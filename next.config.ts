@@ -1,7 +1,15 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
+import {NextRequest, NextResponse} from "next/server";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+    async rewrites() {
+        return [
+            {
+                source: '/elastic/:path*',
+                destination: 'https://localhost:9200/:path*',
+            },
+        ];
+    },
 };
 
 export default nextConfig;

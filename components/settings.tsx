@@ -1,27 +1,35 @@
 import { Settings } from "@/types/settingTypes"
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
+
+import {
+    DEFAULT_BLUR,
+    DEFAULT_BOT,
+    DEFAULT_HEIGHT,
+    DEFAULT_OPACITY, DEFAULT_RADIUS,
+    DEFAULT_TOP,
+    DEFAULT_WIDTH
+} from "@/config/heatmapDefaultValues";
 
 type SettingPageProps = {
 setSettings: (settings: Settings) => void;
 };
 
+
 export default function SettingPage({ setSettings }: SettingPageProps) {
-    const [blur, setBlur] = useState<number>(1);
-    const [box, setBox] = useState<string>("75,-180,-65,180");
-    const [dotsize, setDotsize] = useState<number>(100);
-    const [effect, setEffect] = useState<number>(0.5);
-    const [height, setHeight] = useState<number>(800);
-    const [width, setWidth] = useState<number>(1280);
-    const [opacity, setOpacity] = useState<number>(128);
+    const [blur, setBlur] = useState<number>(DEFAULT_BLUR);
+    const [dotsize, setDotsize] = useState<number>(DEFAULT_RADIUS);
+    const [bottomValue, setBottomValue] = useState<number>(DEFAULT_BOT);
+    const [topValue, setTopValue] = useState<number>(DEFAULT_TOP)
+    const [height, setHeight] = useState<number>(DEFAULT_HEIGHT);
+    const [width, setWidth] = useState<number>(DEFAULT_WIDTH);
+    const [opacity, setOpacity] = useState<number>(DEFAULT_OPACITY);
     const [precision, setPrecision] = useState<number>(8);
-    const [query, setQuery] = useState<string>("_exists_:_index");
-    const [url, setUrl] = useState<string>("http://localhost:9200");
 
     const handleSubmit = useCallback((e : React.FormEvent) => {
         e.preventDefault()
         
-        setSettings({blur,box,dotsize,effect,height,width,opacity,precision,query,url})
-    },[blur, box, dotsize, effect, height, width, opacity, precision, query, url, setSettings])
+        setSettings({blur, dotsize, bottomValue, topValue, height, width, opacity, precision})
+    },[blur, dotsize, bottomValue, topValue, height, width, opacity, precision, setSettings])
 
     return (
         <div>
@@ -31,37 +39,35 @@ export default function SettingPage({ setSettings }: SettingPageProps) {
                     <input
                         type="number"
                         value={blur}
-                        step={0.1}
+                        step={0.05}
                         onChange={(e) => setBlur(Number(e.target.value))}
                     />
                 </div>
-
                 <div>
-                    <label>Box:</label>
+                    <label>Bottom Value:</label>
                     <input
-                        type="text"
-                        value={box}
-                        onChange={(e) => setBox(e.target.value)}
+                        type="number"
+                        value={bottomValue}
+                        step={1}
+                        onChange={(e) => setBottomValue(Number(e.target.value))}
                     />
                 </div>
-
+                <div>
+                    <label>Top Value:</label>
+                    <input
+                        type="number"
+                        value={topValue}
+                        step={1}
+                        onChange={(e) => setTopValue(Number(e.target.value))}
+                    />
+                </div>
                 <div>
                     <label>Dotsize:</label>
                     <input
                         type="number"
                         value={dotsize}
-                        step={20}
+                        step={5}
                         onChange={(e) => setDotsize(Number(e.target.value))}
-                    />
-                </div>
-
-                <div>
-                    <label>Effect:</label>
-                    <input
-                        type="number"
-                        value={effect}
-                        step={0.1}
-                        onChange={(e) => setEffect(Number(e.target.value))}
                     />
                 </div>
 
@@ -90,13 +96,13 @@ export default function SettingPage({ setSettings }: SettingPageProps) {
                     <input
                         type="number"
                         value={opacity}
-                        step={20}
+                        step={0.05}
                         onChange={(e) => setOpacity(Number(e.target.value))}
                     />
                 </div>
 
                 <div>
-                    <label>Precision:</label>
+                    <label>Precision (no function):</label>
                     <input
                         type="number"
                         value={precision}
@@ -104,24 +110,6 @@ export default function SettingPage({ setSettings }: SettingPageProps) {
                         max={12}
                         min={1}
                         onChange={(e) => setPrecision(Number(e.target.value))}
-                    />
-                </div>
-
-                <div>
-                    <label>Query:</label>
-                    <input
-                        type="text"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
-                </div>
-
-                <div>
-                    <label>URL:</label>
-                    <input
-                        type="text"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
                     />
                 </div>
                 <button type="submit" onClick={handleSubmit}>Änderungen speichern</button>
