@@ -3,6 +3,6 @@ export const DEFAULT_ELASTIC_SETTINGS = {
     username: "elastic",
     password: "test111",
     index:"",
-    resultSize: 10000
+    resultSize: 0,
 
 }

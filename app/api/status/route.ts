@@ -1,28 +1,23 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import net from "net";
+import { NextResponse } from "next/server";
+import {DEFAULT_ELASTIC_SETTINGS} from "@/config/elasticConfig";
+import axios from "axios";
+import * as https from "node:https";
+import {loadElasticCert} from "@/utlis/server-side/elasticCert";
 
-async function isPortOpen(host: string, port: number, timeout = 2000): Promise<boolean> {
-    return new Promise((resolve) => {
-        const socket = new net.Socket();
-        socket.setTimeout(timeout);
+async function areYouReady(url?: string): Promise<boolean> {
+    const httpsAgent = new https.Agent({ca: loadElasticCert()})
+    try {
+        const result = await axios.get(url||DEFAULT_ELASTIC_SETTINGS.url, {httpsAgent, validateStatus: (state) => state >= 200 && state < 500 });
 
-        socket.once("connect", () => {
-            socket.destroy();
-            resolve(true);
-        });
-
-        socket.once("error", () => resolve(false));
-        socket.once("timeout", () => resolve(false));
-
-        socket.connect(port, host);
-    });
+        return result.status == 200 || result.status == 401;
+    } catch (error) {
+        return false;
+    }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const [elasticsearch, rest] = await Promise.all([
-        isPortOpen("localhost", 9200),
-        isPortOpen("localhost", 8080),
-    ]);
+export async function GET() {
 
-    res.status(200).json({ elasticsearch, rest });
+    const elasticsearch = await areYouReady()
+
+    return NextResponse.json({ elasticsearch });
 }

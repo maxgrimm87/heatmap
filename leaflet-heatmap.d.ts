@@ -1,5 +1,6 @@
 declare module 'heatmap.js/plugins/leaflet-heatmap' {
     import { Layer, Map, LatLngBoundsExpression } from 'leaflet';
+    import {Coordinates} from "@/types/heatmapData";
 
     interface HeatmapOptions {
         radius?: number;
@@ -9,10 +10,13 @@ declare module 'heatmap.js/plugins/leaflet-heatmap' {
         latField?: string;
         lngField?: string;
         valueField?: string;
+        onExtremaChange?: () => void;
+        gradient?: {[key: string]: string};
     }
 
     interface HeatmapData {
         max: number;
+        min?: number;
         data: Array<{
             lat: number;
             lng: number;
@@ -24,10 +28,29 @@ declare module 'heatmap.js/plugins/leaflet-heatmap' {
     export default class HeatmapOverlay extends Layer {
         constructor(config: HeatmapOptions);
 
-        onAdd(map: Map): void; // Diese Methode ist erforderlich
-        onRemove(map: Map): void; // Diese Methode ist ebenfalls erforderlich
+        onAdd(map: Map): Layer;
+        onRemove(map: Map): Layer;
 
         setData(data: HeatmapData): void;
-        addData(dataPoint: { lat: number; lng: number; count: number }): void;
+        addData(points: Coordinates|Coordinates[]): void;
+
+        _data: {
+            latlng: {lat: number; lng: number};
+            count: number;
+        }[]
+
+        _heatmap: {
+            _store: {
+                _max: number;
+            }
+            setDataMax(number: number): void;
+            setDataMin(min: number): void;
+
+            configure(data: HeatmapData): void;
+            getValueAt(point: {x: number, y: number});
+            getData();
+            getDataURL();
+            repaint();
+        }
     }
 }

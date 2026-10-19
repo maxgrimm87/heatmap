@@ -1,4 +1,4 @@
-import {LfmSettings} from "@/types/settingTypes";
+import {MapSettings} from "@/types/settingTypes";
 import {
     DEFAULT_HEIGHT,
     DEFAULT_OPACITY,
@@ -7,33 +7,41 @@ import {
     DEFAULT_WIDTH
 } from "@/config/heatmapDefaultValues";
 import React, {useCallback, useEffect, useState} from "react";
+import {useGlobalData} from "@/context/GlobalData";
 
-type LfmSettingPageProps = {
-    setSettings: (settings: LfmSettings) => void;
-    foundMaxValue?: number;
+//TODO:
+//  FEHLER: Slider springt in Firefox zurück auf letzten Wert. Chromium funktioniert. Number Input auch
+
+
+type SettingPageProps = {
+    setSettings: (settings: MapSettings) => void;
+
 };
-export default function LfmSettingPage({setSettings, foundMaxValue}: LfmSettingPageProps) {
+export default function MapSettingPage({setSettings}: SettingPageProps) {
     const [height, setHeight] = useState<number>(DEFAULT_HEIGHT);
     const [width, setWidth] = useState<number>(DEFAULT_WIDTH);
-    const [topValue, setTopValue] = useState<number>(DEFAULT_TOP);
     const [maxZoom, setMaxZoom] = useState<number>(18);
-    const [maxValue,setMaxValue] = useState<number>(foundMaxValue || 100);
+    const [maxValue,setMaxValue] = useState<number>(100);
+    const [topValue, setTopValue] = useState<number>(DEFAULT_TOP);
     const [opacity, setOpacity] = useState<number>(DEFAULT_OPACITY);
     const [radius, setRadius] = useState<number>(DEFAULT_RADIUS);
     const [scaleRadius, setScaleRadius] = useState<boolean>(true);
     const [localExtremes, setLocalExtremes] = useState<boolean>(false);
+    const { globalData, setDataByKey }  = useGlobalData()
 
-    useEffect(() => {
-        if (foundMaxValue) {
-            setMaxValue(foundMaxValue);
-        }
-    }, [foundMaxValue]);
 
     const handleSubmit = useCallback((e: React.FormEvent) => {
         e.preventDefault()
 
         setSettings({height, width, topValue, maxZoom, opacity, radius, scaleRadius, localExtremes})
     }, [height, width, topValue, maxZoom, opacity, radius, scaleRadius, localExtremes])
+
+    useEffect(() => {
+        if (globalData.TopValue) {
+            setMaxValue(globalData.TopValue)
+            setTopValue(globalData.TopValue)
+        }
+    }, [globalData.TopValue]);
 
     return (<form onSubmit={handleSubmit}>
             <table>
@@ -47,9 +55,10 @@ export default function LfmSettingPage({setSettings, foundMaxValue}: LfmSettingP
                             min={200}
                             max={2000}
                             step={20}
-                            defaultValue={height}
+                            value={height}
                             onChange={(e) => {
-                                setHeight(Number(e.currentTarget.value))
+                                setTimeout(() => {setHeight(Number(e.currentTarget.value))}, 10)
+
                             }}
                             onMouseUp={handleSubmit}
                         />
@@ -72,7 +81,7 @@ export default function LfmSettingPage({setSettings, foundMaxValue}: LfmSettingP
                             min={200}
                             max={2000}
                             step={20}
-                            defaultValue={width}
+                            value={width}
                             onChange={(e) => {
                                 setWidth(Number(e.currentTarget.value))
                             }}
@@ -99,7 +108,7 @@ export default function LfmSettingPage({setSettings, foundMaxValue}: LfmSettingP
                             min={10}
                             max={maxValue}
                             step={1}
-                            defaultValue={topValue}
+                            value={topValue}
                             onChange={(e) => {
                                 setTopValue(Number(e.currentTarget.value))
                             }}
@@ -124,7 +133,7 @@ export default function LfmSettingPage({setSettings, foundMaxValue}: LfmSettingP
                             min={0}
                             max={1}
                             step={0.05}
-                            defaultValue={opacity}
+                            value={opacity}
                             onChange={(e) => {
                                 setOpacity(Number(e.currentTarget.value))
                             }}
@@ -150,7 +159,7 @@ export default function LfmSettingPage({setSettings, foundMaxValue}: LfmSettingP
                             min={1}
                             max={50}
                             step={1}
-                            defaultValue={radius}
+                            value={radius}
                             onChange={(e) => {
                                 setRadius(Number(e.currentTarget.value))
                             }}
@@ -172,7 +181,10 @@ export default function LfmSettingPage({setSettings, foundMaxValue}: LfmSettingP
                         <button type="submit" className="button-74" onClick={() => setScaleRadius(!scaleRadius)}>scale
                             radius {scaleRadius ? "on" : "off"}</button>
                         <button type="submit" className="button-74"
-                                onClick={() => setLocalExtremes(!localExtremes)}>local
+                                onClick={() => {
+                                    setLocalExtremes(!localExtremes)
+                                    setDataByKey("LocalExtremeOn", !localExtremes)
+                                }}>local
                             Extremes {localExtremes ? "on" : "off"}</button>
                         <input type="submit" hidden/></td>
                 </tr>
